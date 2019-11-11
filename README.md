@@ -2,6 +2,11 @@
 
 TensorFlow Lite usage demonstration project on Android applied to the classification of images of dogs and cats. In the repository is also attached a MNIST model and CIFAR10 model in order to play with various basic models.
 
+<ul>
+    <li>MNIST: Classifies images or drawings of numbers between 0 and 9.</li>
+    <li>CIFAR10: Classifies images or drawings of airplanes, automobiles, birds, cats, deers, dogs, frogs, horses, ships and trucks</li>
+</ul>
+
 The application demo is based on the classification of random images of cats and dogs extracted from the internet using The Cat API and The Dog API. 
 
 <ul><li><b>Before compiling and running the demo</b>, you must register for an API key in https://thecatapi.com/signup in order to fetch cat images and use it as a RequestProperty in the GET petition in APIRequest.kt.</li></ul>
