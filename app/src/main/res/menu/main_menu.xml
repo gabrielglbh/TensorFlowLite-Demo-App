@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/load_image"
+        android:orderInCategory="1"
+        android:title="@string/menu_load_image_from_file"
+        android:icon="@drawable/ic_attach_file"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/share_image"
+        android:orderInCategory="2"
+        android:title="@string/menu_share_image"
+        android:icon="@drawable/ic_share"
+        app:showAsAction="ifRoom"/>
+</menu>

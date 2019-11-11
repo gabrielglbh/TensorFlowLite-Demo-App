@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">CatsVsDogs</string>
+    <string name="fetch_cat">Fetch Cat!</string>
+    <string name="fetch_dog">Fetch Dog!</string>
+    <string name="predicted_label">Predicted:</string>
+    <string name="confidence_label">Confidence:</string>
+    <string name="cats_vs_dogs">Cats Vs Dogs</string>
+    <string name="wait_for_img">Loading…</string>
+    <string name="file_format_name">yyyyMMdd_HHmmss</string>
+    <string name="toast_image_saved">Image Saved!</string>
+    <string name="toast_error_saving">Image could not be saved</string>
+    <string name="toast_error_directory">Directory could not be created</string>
+    <string name="toast_no_sd">No SD card found on device</string>
+    <string name="menu_load_image_from_file">Load Image From File</string>
+    <string name="menu_share_image">Share Image</string>
+    <string name="toast_image_err_gallery">Image could not be uploaded</string>
+    <string name="toast_image_not_ready_to_share">Image is not loaded</string>
+</resources>
