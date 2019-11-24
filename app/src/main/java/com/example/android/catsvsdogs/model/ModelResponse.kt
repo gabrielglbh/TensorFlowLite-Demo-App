@@ -1,13 +1,14 @@
-package com.example.android.catsvsdogs.models
+package com.example.android.catsvsdogs.model
 
 import com.google.gson.annotations.SerializedName
+import org.json.JSONObject
 
-class CatModel(breeds: List<String>, height: String, id: String, url: String, width: String) {
+class ModelResponse(breeds: List<JSONObject>, height: Int, id: String, url: String, width: Int) {
     @SerializedName("breeds")
-    var breeds: List<String>? = null
+    var breeds: List<JSONObject>? = null
 
     @SerializedName("height")
-    var height: String? = null
+    var height: Int? = null
 
     @SerializedName("id")
     var id: String? = null
@@ -16,7 +17,7 @@ class CatModel(breeds: List<String>, height: String, id: String, url: String, wi
     var url: String? = null
 
     @SerializedName("width")
-    var width: String? = null
+    var width: Int? = null
 
     init {
         this.breeds = breeds

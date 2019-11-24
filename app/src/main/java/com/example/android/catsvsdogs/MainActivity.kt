@@ -30,8 +30,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.exifinterface.media.ExifInterface
-import com.example.android.catsvsdogs.models.CatModel
-import com.example.android.catsvsdogs.models.DogModel
+import com.example.android.catsvsdogs.model.ModelResponse
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
@@ -193,7 +192,7 @@ class MainActivity: AppCompatActivity() {
         if (cl == dogConst) {
             val builder = Uri.Builder()
                 .scheme("https")
-                .authority("dog.ceo")
+                .authority("api.thedogapi.com")
             return builder.build().toString()
         } else {
             val builder = Uri.Builder()
@@ -209,43 +208,29 @@ class MainActivity: AppCompatActivity() {
      * @param cl: Type of image
      * */
     private fun getImageFromResponse(service: RetrofitInstance.GetService, cl: String) {
+        val call: Call<List<ModelResponse>>
         if (cl == dogConst) {
-            val call = service.getDogPhotos()
-            call.enqueue(object: retrofit2.Callback<DogModel> {
-                override fun onFailure(call: Call<DogModel>, t: Throwable) {
-                    setError()
-                }
-
-                override fun onResponse(call: Call<DogModel>, response: Response<DogModel>) {
-                    if (response.isSuccessful) {
-                        snackbar?.dismiss()
-                        val json = response.body()
-                        imgResponse = json?.message
-                        paintImage(imgResponse)
-                    } else {
-                        setError()
-                    }
-                }
-            })
+            call = service.getDogPhotos()
         } else {
-            val call = service.getCatPhotos()
-            call.enqueue(object: retrofit2.Callback<List<CatModel>> {
-                override fun onFailure(call: Call<List<CatModel>>, t: Throwable) {
+            call = service.getCatPhotos()
+        }
+
+        call.enqueue(object: retrofit2.Callback<List<ModelResponse>> {
+            override fun onFailure(call: Call<List<ModelResponse>>, t: Throwable) {
+                setError()
+            }
+
+            override fun onResponse(call: Call<List<ModelResponse>>, response: Response<List<ModelResponse>>) {
+                if (response.isSuccessful) {
+                    snackbar?.dismiss()
+                    val json = response.body()
+                    imgResponse = json!![0].url
+                    paintImage(imgResponse)
+                } else {
                     setError()
                 }
-
-                override fun onResponse(call: Call<List<CatModel>>, response: Response<List<CatModel>>) {
-                    if (response.isSuccessful) {
-                        snackbar?.dismiss()
-                        val json = response.body()
-                        imgResponse = json!![0].url
-                        paintImage(imgResponse)
-                    } else {
-                        setError()
-                    }
-                }
-            })
-        }
+            }
+        })
     }
 
     /**

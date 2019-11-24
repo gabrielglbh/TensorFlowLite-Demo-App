@@ -1,7 +1,6 @@
 package com.example.android.catsvsdogs
 
-import com.example.android.catsvsdogs.models.CatModel
-import com.example.android.catsvsdogs.models.DogModel
+import com.example.android.catsvsdogs.model.ModelResponse
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,12 +12,13 @@ class RetrofitInstance(private val BASE_URL: String) {
     private var retrofit: Retrofit? = null
 
     interface GetService {
-        @GET("/api/breeds/image/random")
-        fun getDogPhotos(): Call<DogModel>
-
-        @Headers("x-api-key: YOUR-CAT-API-KEY")
+        @Headers("x-api-key: API-KEY-FOR-DOG-API")
         @GET("/v1/images/search")
-        fun getCatPhotos(): Call<List<CatModel>>
+        fun getDogPhotos(): Call<List<ModelResponse>>
+
+        @Headers("x-api-key: API-KEY-FOR-CAT-API")
+        @GET("/v1/images/search")
+        fun getCatPhotos(): Call<List<ModelResponse>>
     }
 
     fun getRetrofitInstance(): Retrofit {

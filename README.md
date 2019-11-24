@@ -9,7 +9,7 @@ TensorFlow Lite usage demonstration project on Android applied to the classifica
 
 The application demo is based on the classification of random images of cats and dogs extracted from the internet using The Cat API and The Dog API. 
 
-<ul><li><b>Before compiling and running the demo</b>, you must register for an API key in https://thecatapi.com/signup in order to fetch cat images and use it as a RequestProperty in the GET petition in APIRequest.kt.</li></ul>
+<ul><li><b>Before compiling and running the demo</b>, you must register for an API key in https://thecatapi.com/signup and in https://thedogapi.com/signup in order to fetch cat and dog images and use it as a @Header in the GET petition in RetrofitInstance.kt.</li></ul>
 
 ## Loading the model
 
