@@ -13,7 +13,7 @@ The application demo is based on the classification of random images of cats and
 
 ## Loading the model
 
-In order to load a model, you must move or copy the model to the assets folder and modify various variables in Classifier.kt depending on the model:
+In order to load a model, you must move or copy the model to the assets folder and modify various variables in Classifier.kt depending on the model (in order to use MNIST or CIFAR10, the application may need changes):
 
 ### Cats-Vs-Dogs
 
