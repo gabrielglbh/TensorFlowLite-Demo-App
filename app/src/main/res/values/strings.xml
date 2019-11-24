@@ -15,4 +15,7 @@
     <string name="menu_share_image">Share Image</string>
     <string name="toast_image_err_gallery">Image could not be uploaded</string>
     <string name="toast_image_not_ready_to_share">Image is not loaded</string>
+    <string name="failure_connection">Failure</string>
+    <string name="snackbar_error">Something failed. No cutie was loaded :(</string>
+    <string name="snackbar_action">Retry</string>
 </resources>

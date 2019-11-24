@@ -16,8 +16,10 @@ import kotlin.math.round
 class Classifier(private val ctx: Context) {
 
     // TODO: Change INPUT_WIDTH and INPUT_HEIGHT to match your input tensor on the model
-    val INPUT_WIDTH = 75
-    val INPUT_HEIGHT = 75
+    private val INPUT_WIDTH = 75
+    private val INPUT_HEIGHT = 75
+    // TODO: Change the FloatArray size to match the number of labels of your model
+    private val NUM_CLASSES = 2
 
     /**
      * loadModel: Loads the tensorflow lite model based on model
@@ -52,14 +54,12 @@ class Classifier(private val ctx: Context) {
         val img = Bitmap.createScaledBitmap(bm, INPUT_WIDTH, INPUT_HEIGHT, true)
         val buffer = convertBitmapToByteBuffer(img)
 
-        // TODO: Change the FloatArray size to match the number of labels of your model
-        val result = Array(1) { FloatArray(2) }
+        val result = Array(1) { FloatArray(NUM_CLASSES) }
         interpreter?.run(buffer, result)
         val parsedResults = ArrayList<Float>()
-        // TODO: Make a for loop to set all results into parsedResults from results in case your model
-        // is a multiclass classification model
-        parsedResults.add(result[0][0])
-        parsedResults.add(result[0][1])
+        for (res in result[0]) {
+            parsedResults.add(res)
+        }
 
         val conf = Collections.max(parsedResults)
         val indexOfMax = parsedResults.indexOf(conf)

@@ -12,8 +12,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import com.squareup.picasso.Picasso
-import org.json.JSONArray
-import org.json.JSONObject
 import org.tensorflow.lite.Interpreter
 import com.squareup.picasso.Callback
 import java.lang.Exception
@@ -29,13 +27,20 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.exifinterface.media.ExifInterface
+import com.example.android.catsvsdogs.models.CatModel
+import com.example.android.catsvsdogs.models.DogModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
+import retrofit2.Call
+import retrofit2.Response
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity: AppCompatActivity() {
 
     private var img: ImageView? = null
     private var predicted: TextView? = null
@@ -55,8 +60,10 @@ class MainActivity : AppCompatActivity() {
     private val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
     private val permissionCodeWrite = 666
     private val loadImageGallery = 555
+    private var loading = 0
+    private var snackbar: Snackbar? = null
 
-    companion object{
+    companion object {
         val classes = listOf("Cat", "Dog")
     }
 
@@ -153,7 +160,7 @@ class MainActivity : AppCompatActivity() {
                 if (readyToShare) {
                     val intent = Intent(Intent.ACTION_SEND)
                     if (imgResponse != null) {
-                        val msg = "Look at this cutie <3\n" + imgResponse
+                        val msg = "Look at this cutie <3\n $imgResponse"
                         intent.putExtra(Intent.EXTRA_TEXT, msg)
                         intent.type = "text/*"
                     } else {
@@ -180,43 +187,72 @@ class MainActivity : AppCompatActivity() {
     /**
      * buildUri: Builds the URI depending on the type of image, dog or cat.
      * @param cl: Type of image
+     * @return String with the URI
      */
     private fun buildUri(cl: String): String {
         if (cl == dogConst) {
             val builder = Uri.Builder()
                 .scheme("https")
                 .authority("dog.ceo")
-                .appendPath("api")
-                .appendPath("breeds")
-                .appendPath("image")
-                .appendPath("random")
             return builder.build().toString()
         } else {
             val builder = Uri.Builder()
                 .scheme("https")
                 .authority("api.thecatapi.com")
-                .appendPath("v1")
-                .appendPath("images")
-                .appendPath("search")
             return builder.build().toString()
         }
     }
 
     /**
-     * getImageFromResponse: From the API response, paints the image onto the ImageView with Picasso
-     * @param json: Full JSON response of API
-     * @param img: ImageView to paint the image on
+     * getImageFromResponse: From the API response, paints the image onto the ImageView
+     * @param service: Instance of the interface providing the call to the API
      * @param cl: Type of image
      * */
-    private fun getImageFromResponse(json: String?, img: ImageView?, cl: String) {
+    private fun getImageFromResponse(service: RetrofitInstance.GetService, cl: String) {
         if (cl == dogConst) {
-            val obj = JSONObject(json)
-            imgResponse = obj.getString("message")
+            val call = service.getDogPhotos()
+            call.enqueue(object: retrofit2.Callback<DogModel> {
+                override fun onFailure(call: Call<DogModel>, t: Throwable) {
+                    setError()
+                }
+
+                override fun onResponse(call: Call<DogModel>, response: Response<DogModel>) {
+                    if (response.isSuccessful) {
+                        snackbar?.dismiss()
+                        val json = response.body()
+                        imgResponse = json?.message
+                        paintImage(imgResponse)
+                    } else {
+                        setError()
+                    }
+                }
+            })
         } else {
-            val arr = JSONArray(json)
-            val obj = arr.getJSONObject(0)
-            imgResponse = obj.getString("url")
+            val call = service.getCatPhotos()
+            call.enqueue(object: retrofit2.Callback<List<CatModel>> {
+                override fun onFailure(call: Call<List<CatModel>>, t: Throwable) {
+                    setError()
+                }
+
+                override fun onResponse(call: Call<List<CatModel>>, response: Response<List<CatModel>>) {
+                    if (response.isSuccessful) {
+                        snackbar?.dismiss()
+                        val json = response.body()
+                        imgResponse = json!![0].url
+                        paintImage(imgResponse)
+                    } else {
+                        setError()
+                    }
+                }
+            })
         }
+    }
+
+    /**
+     * paintImage: Uses Picasso library to populate imageView with URL imgResponse
+     * @param imgResponse: URL that points to image from API
+     **/
+    private fun paintImage(imgResponse: String?) {
         Picasso.get()
             .load(imgResponse)
             .config(Bitmap.Config.ARGB_8888)
@@ -227,8 +263,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 override fun onError(err: Exception?) {
                     readyToShare = false
+                    waiting?.text = getString(R.string.failure_connection)
                 }
             })
+        loading = 0
     }
 
     /**
@@ -239,10 +277,12 @@ class MainActivity : AppCompatActivity() {
         waiting?.visibility = View.VISIBLE
         predicted?.visibility = View.GONE
         confidence?.visibility = View.GONE
+        waiting?.text = getString(R.string.wait_for_img)
         download?.hide()
+
         val url = buildUri(cl)
-        val jsonResponse = APIRequest().execute(url, cl).get()
-        getImageFromResponse(jsonResponse, img, cl)
+        val service = RetrofitInstance(url).getRetrofitInstance().create(RetrofitInstance.GetService::class.java)
+        getImageFromResponse(service, cl)
     }
 
     /**
@@ -259,6 +299,25 @@ class MainActivity : AppCompatActivity() {
         download?.show()
         predicted?.text = results?.get(0)
         confidence?.text = results?.get(1)
+    }
+
+    /**
+     * setError: Updates the UI when a Failure occurs on loading the image from API
+     * */
+    private fun setError() {
+        waiting?.text = getString(R.string.failure_connection)
+        img?.setImageBitmap(getDrawable(R.mipmap.crying)?.toBitmap())
+        snackbar = Snackbar.make(findViewById(R.id.main_layout),
+            getString(R.string.snackbar_error),
+            Snackbar.LENGTH_INDEFINITE)
+        snackbar?.setAction(getString(R.string.snackbar_action), View.OnClickListener {
+            val r = Random()
+            if (r.nextInt(2) == 0) fetchCat(null)
+            else fetchDog(null)
+        })
+        snackbar?.setActionTextColor(ContextCompat.getColor(this, R.color.retry))
+        snackbar?.show()
+        loading = 0
     }
 
     /**
@@ -349,23 +408,29 @@ class MainActivity : AppCompatActivity() {
     /**
      * fetchDog: Calls setUpRequestAndPerform with type 'Dog'
      * */
-    fun fetchDog(view: View) {
+    fun fetchDog(view: View?) {
         readyToShare = false
-        setUpRequestAndPerform(dogConst)
+        if (loading == 0) {
+            setUpRequestAndPerform(dogConst)
+            loading++
+        }
     }
 
     /**
      * fetchCat: Calls setUpRequestAndPerform with type 'Cat'
      * */
-    fun fetchCat(view: View) {
+    fun fetchCat(view: View?) {
         readyToShare = false
-        setUpRequestAndPerform(catConst)
+        if (loading == 0) {
+            setUpRequestAndPerform(catConst)
+            loading++
+        }
     }
 
     /**
      * download: Calls saveImageToStorage
      * */
-    fun download(view: View) {
+    fun download(view: View?) {
         if (checkPermits()) {
             val bitmap = (img?.drawable as BitmapDrawable).bitmap
             saveImageToStorage(bitmap)

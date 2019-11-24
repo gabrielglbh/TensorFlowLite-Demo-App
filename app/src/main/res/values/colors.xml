@@ -7,4 +7,6 @@
     <color name="background">#FAFAFA</color>
     <color name="main_background">#E6E7F1</color>
     <color name="text">#303030</color>
+
+    <color name="retry">#CE93D8</color>
 </resources>
